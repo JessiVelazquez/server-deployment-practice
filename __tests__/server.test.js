@@ -6,24 +6,35 @@ const request = supertest(server.app); // takes in our server application which 
 
 
 // test suite
-describe('SERVER TESTS:', () => {
+describe('API Server', () => {
 
-  // it is an individual test
-  it('should handle not found routes - 404', async () => {
-    // expects -> this is an assertion, as part of a test
-    const response = await request.get('./not-there');
+  it('handles invalid requests', async () => {
+    const response = await request.get('/foo');
     expect(response.status).toEqual(404);
+  })
 
-    // test the output of your routes
-    // test the shape of your data
-    // test the status code of your response
-  });
+  it('handles errors', async () => {
+    const response = await request.get('/bad');
+    expect(response.status).toEqual(500);
+    expect(response.body.route).toEqual('/bad');
+  })
 
-  // and another test
-  it('should also send a proper response', async () => {
-    var response = await request.get('/data');
+  it('/ works', async () => {
+    const response = await request.get('/');
     expect(response.status).toEqual(200);
-    expect(response.body.timestamp).toBe('string');
-  });
+    expect(response.text).toEqual('Hello World');
+  })
 
-})
+  it('/data works', async () => {
+    const response = await request.get('/data');
+    expect(response.status).toEqual(200);
+    expect(typeof response.body).toEqual('object');
+  })
+
+  it('stamper middleware works', async () => {
+    const response = await request.get('/data');
+    expect(response.status).toEqual(200);
+    expect(response.body.time).toBeDefined();
+  })
+
+});
